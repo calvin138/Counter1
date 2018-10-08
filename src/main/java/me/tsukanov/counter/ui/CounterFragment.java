@@ -3,15 +3,21 @@ package me.tsukanov.counter.ui;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.SparseIntArray;
 import android.view.KeyEvent;
@@ -23,7 +29,16 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.Toolbar;
+
+
+import java.text.SimpleDateFormat;
+import java.util.Scanner;
+import java.util.Timer;
 
 import me.tsukanov.counter.CounterApplication;
 import me.tsukanov.counter.R;
@@ -46,6 +61,15 @@ public class CounterFragment extends Fragment {
     private Button incrementButton;
     private Button decrementButton;
 
+    private Handler handler = new Handler();
+    Scanner sc = new Scanner(System.in);
+
+    int y;
+    EditText x;
+    Button set;
+
+
+
     public CounterFragment() {
     }
 
@@ -67,6 +91,7 @@ public class CounterFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 
         app = (CounterApplication) getActivity().getApplication();
         vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
@@ -113,6 +138,7 @@ public class CounterFragment extends Fragment {
 
         return view;
     }
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -177,7 +203,6 @@ public class CounterFragment extends Fragment {
                 return super.onOptionsItemSelected(item);
         }
     }
-
     private void showResetConfirmationDialog() {
         Dialog dialog = new AlertDialog.Builder(getActivity())
                 .setMessage(getResources().getText(R.string.dialog_reset_title))
@@ -204,20 +229,95 @@ public class CounterFragment extends Fragment {
         dialog.show(getFragmentManager(), DeleteDialog.TAG);
     }
 
+    public void valuevalue(){
+        x = (EditText)getActivity().findViewById(R.id.set_value);
+        set = (Button)getActivity().findViewById(R.id.save_value);
+
+        set.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getActivity().getApplicationContext(),"Value set", Toast.LENGTH_SHORT).show();
+                y = Integer.valueOf(x.getText().toString());
+            }
+        });
+    }
+
+    public void setActivityBackgroundColor(int color) {
+        View view = this.getActivity().getWindow().getDecorView();
+        view.setBackgroundColor(color);
+    }
+
+
     public void increment() {
+        valuevalue();
+        final MediaPlayer mp = MediaPlayer.create(getActivity().getApplicationContext(), R.raw.beep);
+        CountDownTimer timer = new CountDownTimer(1000, 1000) {
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+                // Nothing to do
+            }
+
+            @Override
+            public void onFinish() {
+                setActivityBackgroundColor(0xffffffff);
+            }
+        };
+
+
         if (value < MAX_VALUE) {
             setValue(++value);
             vibrate(DEFAULT_VIBRATION_DURATION);
             playSound(Sound.INCREMENT_SOUND);
+
+            if(y<MAX_VALUE){
+                if(value  == y) {
+                    mp.start();
+                    setActivityBackgroundColor(0xff000000);
+                    timer.start();
+                    Toast.makeText(getActivity().getApplicationContext(), "Value Reached", Toast.LENGTH_LONG).show();
+                }
+            }
         }
     }
 
     public void decrement() {
+        valuevalue();
+        MediaPlayer mp = MediaPlayer.create(getActivity().getApplicationContext(), R.raw.beep);
+        CountDownTimer timer = new CountDownTimer(1000, 1000) {
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+                // Nothing to do
+            }
+
+            @Override
+            public void onFinish() {
+                setActivityBackgroundColor(0xffffffff);
+            }
+        };
+
         if (value > MIN_VALUE) {
             setValue(--value);
             vibrate(DEFAULT_VIBRATION_DURATION + 20);
             playSound(Sound.DECREMENT_SOUND);
+
+            if(y>MIN_VALUE){
+                if(value == y){
+                    mp.start();
+                    setActivityBackgroundColor(0xff000000);
+                    timer.start();
+                    Toast.makeText(getActivity().getApplicationContext(),"Value Reached",Toast.LENGTH_LONG).show();
+                }
+            }
+
+
         }
+    }
+    private  void Sound(MediaPlayer mediaPlayer){
+        MediaPlayer mp = MediaPlayer.create(getActivity().getApplicationContext(), R.raw.beep);
+        mp.start();
+
     }
 
     public void reset() {
