@@ -68,6 +68,35 @@ public class CounterFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+<<<<<<< Updated upstream
+=======
+
+        Thread t = new Thread(){
+            @Override
+            public void run(){
+                try{
+                    if(!isInterrupted()) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                TextView tdate = (TextView) getActivity().findViewById(R.id.date);
+                                long date = System.currentTimeMillis();
+                                SimpleDateFormat sdf = new SimpleDateFormat("MMM dd yyyy\nhh-mm-ss a");
+                                String dateString = sdf.format(date);
+                                tdate.setText("Start Time " + dateString);
+                            }
+                        });
+
+                    }
+                }finally {
+
+                }
+            }
+        };
+        t.start();
+
+
+>>>>>>> Stashed changes
         app = (CounterApplication) getActivity().getApplication();
         vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
         settings = PreferenceManager.getDefaultSharedPreferences(getActivity());

@@ -1,5 +1,7 @@
 package me.tsukanov.counter.ui;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -12,9 +14,15 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.TextView;
+
+import java.text.SimpleDateFormat;
 
 import me.tsukanov.counter.CounterApplication;
 import me.tsukanov.counter.R;
@@ -44,9 +52,33 @@ public class MainActivity extends AppCompatActivity {
         if (sharedPref.getString(PREF_THEME, THEME_LIGHT).equals(THEME_DARK)) {
             setTheme(R.style.AppTheme_Dark);
         }
-        
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.drawer_layout);
+
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    while (!isInterrupted()) {
+                        Thread.sleep(1000);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                TextView tdate = (TextView) findViewById(R.id.end_time);
+                                long date = System.currentTimeMillis();
+                                SimpleDateFormat sdf = new SimpleDateFormat("MMM dd yyyy\nhh-mm-ss a");
+                                String dateString = sdf.format(date);
+                                tdate.setText("End Time " + dateString);
+                            }
+                        });
+
+                    }
+                }catch(InterruptedException e){
+                }
+            }
+        };
+        t.start();
 
         app = (CounterApplication) getApplication();
 
@@ -90,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -125,7 +158,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
         return true;
     }
 
@@ -146,6 +180,10 @@ public class MainActivity extends AppCompatActivity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         navigationToggle.onConfigurationChanged(newConfig);
+    }
+
+    public void searchCounter(){
+
     }
 
     @Override
